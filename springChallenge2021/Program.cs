@@ -26,7 +26,8 @@ namespace springChallenge2021
                     string possibleAction = Console.ReadLine(); // try printing something from here to start with
                 }
 
-                var firstTallTree = gameTurn.TreeList.Where(tree => tree.IsMine && tree.Size == TreeSize.Tall).FirstOrDefault();
+                var allTallTree = gameTurn.TreeList.Where(tree => tree.IsMine && tree.Size == TreeSize.Tall);
+                var allTallTreeIndex = 
 
                 // GROW cellIdx | SEED sourceIdx targetIdx | COMPLETE cellIdx | WAIT <message>
                 if (firstTallTree == default(Tree)) {
