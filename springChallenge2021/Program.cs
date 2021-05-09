@@ -18,7 +18,7 @@ namespace springChallenge2021
             // game loop
             while (true)
             {
-                var gameTurn = new GameTurn();
+                var gameTurn = new GameTurn(forest);
 
                 int numberOfPossibleActions = int.Parse(Console.ReadLine()); // all legal actions
                 for (int i = 0; i < numberOfPossibleActions; i++)
@@ -26,14 +26,19 @@ namespace springChallenge2021
                     string possibleAction = Console.ReadLine(); // try printing something from here to start with
                 }
 
-                var allTallTree = gameTurn.TreeList.Where(tree => tree.IsMine && tree.Size == TreeSize.Tall);
-                var allTallTreeIndex = 
+                var mostRichTree = gameTurn.TreeList
+                    .Where(tree => tree.IsMine && !tree.IsDormant)
+                    .OrderByDescending(tree => tree.Size)
+                    .ThenByDescending(tree => tree.Richness)
+                    .FirstOrDefault();
 
                 // GROW cellIdx | SEED sourceIdx targetIdx | COMPLETE cellIdx | WAIT <message>
-                if (firstTallTree == default(Tree)) {
+                if (mostRichTree == default(Tree)) {
                     Console.WriteLine("WAIT");
+                } else if(mostRichTree.Size == TreeSize.Tall) {
+                    Console.WriteLine($"COMPLETE {mostRichTree.Index}");
                 } else {
-                    Console.WriteLine($"COMPLETE {firstTallTree.Index}");
+                    Console.WriteLine($"GROW {mostRichTree.Index}");
                 }
             }
         }
@@ -50,7 +55,7 @@ namespace springChallenge2021
 
         public IList<Tree> TreeList { get; private set; }
 
-        public GameTurn() {
+        public GameTurn(IList<Cell> forest) {
             Day = int.Parse(Console.ReadLine()); // the game lasts 24 days: 0-23
             Nutrients = int.Parse(Console.ReadLine()); // the base score you gain from the next COMPLETE action
             Me = new Player(false);
@@ -58,7 +63,7 @@ namespace springChallenge2021
             var numberOfTrees = int.Parse(Console.ReadLine()); // the current amount of trees
             TreeList = new List<Tree>();
             for (int i = 0; i < numberOfTrees; i++) {
-                TreeList.Add(new Tree());
+                TreeList.Add(new Tree(forest));
             }
         }
     }
@@ -73,12 +78,15 @@ namespace springChallenge2021
 
         public Boolean IsDormant { get; private set; }
 
-        public Tree() {
+        public CellRichness Richness { get; private set; }
+
+        public Tree(IList<Cell> forest) {
             var inputs = Console.ReadLine().Split(' ');
             Index = int.Parse(inputs[0]);
             Size = (TreeSize) Enum.Parse(typeof(TreeSize), inputs[1]);
             IsMine = inputs[2] == "1";
             IsDormant = inputs[3] == "1";
+            Richness = forest.First(tree => tree.Index == Index).Richness;
         }
     }
 
